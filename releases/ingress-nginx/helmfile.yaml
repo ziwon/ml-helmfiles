@@ -1,0 +1,22 @@
+---
+bases:
+  - "../../bases/helmDefaults.yaml"
+  - "../../bases/environments.yaml"
+
+---
+repositories:
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+
+releases:
+  - name: ingress-nginx
+    chart: ingress-nginx/ingress-nginx
+    version: {{ .Values | get "ingress-nginx.chart_version" nil }}
+    namespace: ingress-nginx
+    createNamespace: true
+    installed: {{ .Values | get "ingress-nginx.installed" false }}
+    labels:
+      tier: ops
+    values:
+      - values/default.yaml
+      - values/{{ .Environment.Name }}.yaml.gotmpl

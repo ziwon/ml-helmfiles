@@ -1,0 +1,17 @@
+name: "resnet18"
+platform: "pytorch_libtorch"
+input [
+  {
+    name: "INPUT__0"
+    data_type: TYPE_FP32
+    format: FORMAT_NCHW
+    dims: [ 1, 28, 28 ]
+  }
+]
+output [
+  {
+    name: "OUTPUT__0"
+    data_type: TYPE_FP32
+    dims: [ 10 ]
+  }
+]

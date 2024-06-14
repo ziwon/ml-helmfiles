@@ -1,0 +1,16 @@
+usageMetrics:
+  enabled: true
+
+istio:
+  enabled: false
+
+predictor_servers:
+  TRITON_SERVER:
+    protocols:
+      v2:
+        image: "nvcr.io/nvidia/tritonserver"
+        defaultImageVersion: "23.04-py3"
+
+
+storageInitializer:
+  image: "docker.io/seldonio/rclone-storage-initializer:1.17.1"

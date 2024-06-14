@@ -1,0 +1,15 @@
+resources:
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: pre-emption
+    value: -1
+    globalDefault: false
+    description: "가장 낮은 우선순위로 노드 전체의 리소스를 미리 확보하는 단순 스케쥴 파드에 사용 (예. 오토스케일링)"
+  - apiVersion: scheduling.k8s.io/v1
+    kind: PriorityClass
+    metadata:
+      name: high
+    value: 1000000
+    globalDefault: false
+    description: "가장 높은 우선순위로 무조건 스케쥴링되는 파드에 사용"

@@ -1,0 +1,35 @@
+---
+bases:
+  - "../../bases/helmDefaults.yaml"
+  - "../../bases/environments.yaml"
+
+---
+repositories:
+  - name: seldonio
+    url: https://storage.googleapis.com/seldon-charts
+
+releases:
+  - name: seldon-core-operator
+    chart: seldonio/seldon-core-operator
+    version: {{ .Values | get "seldon-core-operator.chart_version" nil }}
+    installed: {{ .Values | get "seldon-core-operator.installed" false }}
+    namespace: seldon-system
+    createNamespace: true
+    labels:
+      tier: ml
+    values:
+      - values/default.yaml
+    wait: true
+    hooks:
+      - events: ["release"]
+        showlogs: true
+        command: |
+          kubectl wait --for condition=established --timeout=60s crd/seldondeployments.machinelearning.seldon.io
+
+  - name: triton-server
+    chart: ../../charts/raw
+    installed: {{ .Values | get "triton-server.installed" false }}
+    labels:
+      tier: ml
+    values:
+      - values-triton/{{ .Environment.Name }}.yaml.gotmpl

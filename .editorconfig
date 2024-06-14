@@ -1,0 +1,57 @@
+##########################################
+# Common Settings
+##########################################
+# This file is the top-most EditorConfig file
+root = true
+
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_size = 2
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 140
+
+#########################################
+# File Extension Settings
+##########################################
+[*.{yml,yaml}]
+indent_size = 2
+indent_style = space
+
+[*-{secret,secrets}.{yml,yaml}]
+max_line_length = off
+
+[{values.yaml]
+max_line_length = off
+
+[*-apps/envs/*/*.yaml]
+max_line_length = off
+
+[*.md]
+max_line_length = off
+trim_trailing_whitespace = false
+indent_style = none
+
+[*.json]
+indent_size = 2
+indent_style = space
+
+[*.sh]
+indent_size = 2
+indent_style = space
+
+[*.txt]
+max_line_length = off
+trim_trailing_whitespace = false
+indent_style = null
+
+[Makefile]
+tab_width = 2
+indent_style = tab
+max_line_length = off
+
+[COMMIT_EDITMSG]
+max_line_length = off

@@ -1,0 +1,149 @@
+resources:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: pv-models
+  spec:
+    capacity:
+      storage: 10Gi
+    accessModes:
+    - ReadWriteMany
+    storageClassName: standard
+    nfs:
+      server: {{ requiredEnv "NFS_SERVER" }}
+      path: /data/nfs/models
+    mountOptions:
+    {{- readFile "common.yaml" | fromYaml | get "mountOptions" | toYaml | nindent 6 }}
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: pv-data
+  spec:
+    capacity:
+      storage: 10Gi
+    accessModes:
+      - ReadWriteMany
+    storageClassName: standard
+    nfs:
+      server: {{ requiredEnv "NFS_SERVER" }}
+      path: /data/nfs/data
+    mountOptions:
+    {{- readFile "common.yaml" | fromYaml | get "mountOptions" | toYaml | nindent 6 }}
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+    name: pv-logs
+  spec:
+    capacity:
+      storage: 10Gi
+    accessModes:
+    - ReadWriteMany
+    storageClassName: standard
+    nfs:
+      server: {{ requiredEnv "NFS_SERVER" }}
+      path: /data/nfs/logs
+    mountOptions:
+    {{- readFile "common.yaml" | fromYaml | get "mountOptions" | toYaml | nindent 6 }}
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: pvc-models
+  spec:
+    accessModes:
+    - ReadWriteMany
+    storageClassName: standard
+    resources:
+      requests:
+        storage: 10Gi
+    volumeName: pv-models
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: pvc-data
+  spec:
+    accessModes:
+    - ReadWriteMany
+    storageClassName: standard
+    resources:
+      requests:
+        storage: 10Gi
+    volumeName: pv-data
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: pvc-logs
+  spec:
+    accessModes:
+    - ReadWriteMany
+    storageClassName: standard
+    resources:
+      requests:
+        storage: 10Gi
+    volumeName: pv-logs
+- apiVersion: batch/v1
+  kind: Job
+  metadata:
+    name: resnet18-train-job
+  spec:
+    backoffLimit: 3
+    completions: 1
+    parallelism: 1
+    template:
+      spec:
+        restartPolicy: OnFailure
+        containers:
+        - name: resnet18-trainer
+          image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_TRAIN_TAG" }}:{{ .Values | get "training-job.app_version" "0.1.0" }}
+          resources:
+            limits:
+              cpu: 4
+              memory: 4Gi
+              # nvidia.com/gpu: 4
+            requests:
+              cpu: 2
+              memory: 2Gi
+              # nvidia.com/gpu: 2
+          env:
+          - name: DATA_DIR
+            value: /mnt/data
+          - name: MODEL_DIR
+            value: /mnt/models
+          - name: LOG_DIR
+            value: /mnt/logs
+          - name: VERSION
+            value: "2"
+          - name: BATCH_SIZE
+            value: "64"
+          - name: NUM_WORKERS
+            value: "4"
+          - name: LEARNING_RATE
+            value: "0.001"
+          - name: WEIGHT_DECAY
+            value: "0.0001"
+          - name: MAX_EPOCHS
+            value: "2"    # Reduced for the Minikube demo environment.
+          - name: DISTRIBUTED_BACKEND
+            value: "auto"
+          volumeMounts:
+          - name: models-volume
+            mountPath: /mnt/models
+          - name: data-volume
+            mountPath: /mnt/data
+          - name: logs-volume
+            mountPath: /mnt/logs
+          - name: dshm
+            mountPath: /dev/shm
+        volumes:
+        - name: models-volume
+          persistentVolumeClaim:
+            claimName: pvc-models
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: pvc-data
+        - name: logs-volume
+          persistentVolumeClaim:
+            claimName: pvc-logs
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi

@@ -1,0 +1,5 @@
+---
+fullnameOverride: nfs-provisioner
+
+storageClass:
+  create: false

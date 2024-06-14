@@ -1,0 +1,25 @@
+---
+{{- $envValuesDir := print (regexReplaceAll "/releases/[^/]+$" (env "PWD") "") "/bases/environments" }}
+
+environments:
+  __shared:
+    values:
+      - &cluster_common
+        storage_class:
+          installed: true
+        priority_class:
+          installed: true
+
+  minikube:
+    kubeContext: minikube
+    values:
+      - <<: *cluster_common
+      - {{ $envValuesDir }}/minikube.yaml
+
+  # prod:
+  #   kubeContext: prod
+  #   values:
+
+  # dev:
+  #   kubeContext: dev
+  #   values:

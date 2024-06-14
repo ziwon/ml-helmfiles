@@ -1,0 +1,31 @@
+job:
+  name: resnet18-training
+  restartPolicy: Never
+  backoffLimit: 1
+  parallelism: 1
+  completion:
+  ttlSecondsAfterFinished: 3600
+
+  metadata:
+    namespace: training
+    labels: {}
+
+image:
+  repository: host.minikube.internal:5000/resnet18-training
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+resources: {}
+
+volumes: []
+
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

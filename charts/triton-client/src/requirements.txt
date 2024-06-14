@@ -1,0 +1,4 @@
+tritonclient[grpc]
+tensorflow
+datasets
+pillow

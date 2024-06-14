@@ -1,0 +1,16 @@
+mountOptions:
+- nfsvers=4
+- proto=tcp
+- rsize=1048576
+- wsize=1048576
+- bg
+- soft
+- retry=3
+- nolock
+- noatime
+- rw
+- async
+- timeo=600
+- actimeo=600
+- retrans=2
+- nconnect=16

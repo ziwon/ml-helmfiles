@@ -1,0 +1,78 @@
+resources:
+- apiVersion: storage.k8s.io/v1
+  kind: StorageClass
+  metadata:
+    name: nfs-models
+  provisioner: nfs-provisioner
+  allowVolumeExpansion: true
+  reclaimPolicy: Delete
+  volumeBindingMode: Immediate
+  parameters:
+    pathPattern: models
+    onDelete: retain
+  mountOptions:
+    - nfsvers=4
+    - proto=tcp
+    - rsize=1048576
+    - wsize=1048576
+    - bg
+    - soft
+    - retry=3
+    - nolock
+    - noatime
+    - rw
+    - noatime
+    - async
+    - timeo=600
+    - actimeo=600
+    - retrans=2
+    - nconnect=16
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    labels:
+      app: raw
+      chart: raw-2.0.1
+      heritage: Helm
+      release: triton-server
+    name: nfs-pvc
+    namespace: seldon-system
+  spec:
+    accessModes:
+    - ReadWriteMany
+    resources:
+      requests:
+        storage: 2Gi
+    storageClassName: nfs-models
+- apiVersion: machinelearning.seldon.io/v1
+  kind: SeldonDeployment
+  metadata:
+    labels:
+    name: triton-server
+    namespace: seldon-system
+  spec:
+    name: triton-server
+    predictors:
+    - componentSpecs:
+      - spec:
+          containers:
+          - name: mnist
+            resources:
+              limits:
+                cpu: 4
+                memory: 4Gi
+                # nvidia.com/gpu: 4
+              requests:
+                cpu: 2
+                memory: 2Gi
+                # nvidia.com/gpu: 2
+      graph:
+        implementation: TRITON_SERVER
+        logger:
+          mode: all
+        modelUri: pvc://nfs-pvc
+        name: mnist
+        type: MODEL
+      name: default
+      replicas: 1
+    protocol: v2

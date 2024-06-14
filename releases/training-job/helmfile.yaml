@@ -1,0 +1,17 @@
+---
+bases:
+  - ../../bases/helmDefaults.yaml
+  - ../../bases/environments.yaml
+
+---
+releases:
+  - name: training-job
+    chart: ../../charts/raw
+    installed: {{ .Values | getOrNil "training-job.installed" | default false }}
+    namespace: seldon-system
+    createNamespace: true
+    labels:
+      tier: train
+    values:
+      - values.yaml.gotmpl
+    force: true

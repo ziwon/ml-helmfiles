@@ -1,0 +1,15 @@
+---
+bases:
+  - ../../bases/helmDefaults.yaml
+  - ../../bases/environments.yaml
+
+---
+releases:
+  - name: storage-class
+    chart: ../../charts/raw
+    installed: {{ .Values | getOrNil "storage_class.installed" | default false }}
+    labels:
+      bootstrap: true
+      tier: common
+    values:
+      - values.yaml

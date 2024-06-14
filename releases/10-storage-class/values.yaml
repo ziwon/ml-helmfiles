@@ -1,0 +1,29 @@
+resources:
+  - apiVersion: storage.k8s.io/v1
+    kind: StorageClass
+    metadata:
+      name: nfs-client
+    provisioner: nfs-provisioner
+    allowVolumeExpansion: true
+    reclaimPolicy: Delete
+    volumeBindingMode: Immediate
+    parameters:
+      pathPattern: "${.PVC.namespace}/${.PVC.annotations.nfs.io/storage-path}"
+      onDelete: retain
+    mountOptions:
+      - nfsvers=4
+      - proto=tcp
+      - rsize=1048576
+      - wsize=1048576
+      - bg
+      - soft
+      - retry=3
+      - nolock
+      - noatime
+      - rw
+      - noatime
+      - async
+      - timeo=600
+      - actimeo=600
+      - retrans=2
+      - nconnect=16

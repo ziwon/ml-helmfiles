@@ -1,0 +1,22 @@
+ingress-nginx:
+  installed: true
+  chart_version: 4.10.1
+
+nfs-provisioner:
+  installed: true
+  chart_version: 4.0.18
+
+seldon-core-operator:
+  installed: true
+  chart_version: 1.17.1
+
+triton-server:
+  installed: true
+
+training-job:
+  installed: true
+  app_version: 0.0.3
+
+triton-client:
+  installed: true
+  app_version: 0.0.2

@@ -1,0 +1,7 @@
+nfs:
+  server: {{ requiredEnv "NFS_SERVER" }}
+  path: {{ requiredEnv "NFS_PATH" }}
+
+storageClass:
+  name: nfs-client
+  provisionerName: nfs-provisioner

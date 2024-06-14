@@ -1,0 +1,7 @@
+helm        3.15.1
+helm-diff   3.9.5
+helmfile    0.165.0
+yq          4.44.1
+k9s         0.32.4
+kubectx     0.9.5
+kubetail    1.6.20

@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Values.job.name }}
+  namespace: {{ .Values.job.metadata}}
+  labels:
+    {{- include "resnet18-training.labels" . | nindent 4 }}
+spec:
+  backoffLimit: {{- with .Values.job.backoffLimit }}
+  activeDeadlineSeconds: {{- with .Values.job.activeDeadlineSeconds }}
+  parallelism: {{- with .Values.job.parallelism }}
+  completion: {{- with .Values.job.completion }}
+  ttlSecondsAfterFinished: {{- with .Values.ttlSecondsAfterFinished }}
+  template:
+    metadata:
+  name: {{ include "resnet18-training.fullname" . }}
+  labels:
+    {{- include "resnet18-training.labels" . | nindent 4 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "resnet18-training.serviceAccountName" . }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      restartPolicy: {{ - with .Values.job.restartPolicy }}
+      {{- with .Values.volumes }}
+      volumes:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+  suspend: false

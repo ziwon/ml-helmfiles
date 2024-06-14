@@ -1,0 +1,21 @@
+resources:
+- apiVersion: v1
+  kind: Pod
+  metadata:
+    name: triton-client
+  spec:
+    containers:
+    - name: triton-client
+      image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_CLIENT_TAG" }}:{{ .Values | get "triton-client.app_version" "0.1.0" }}
+      env:
+      - name: TRITON_SERVER_URL
+        value: "triton-server-default:5001"
+      - name: MODEL_NAME
+        value: "mnist"
+      - name: MODEL_VERSION
+        value: "1"
+      - name: NUM_SAMPLES
+        value: "10"
+      - name: DATASET
+        value: "ylecun/mnist"
+    restartPolicy: Never

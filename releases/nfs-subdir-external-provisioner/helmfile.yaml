@@ -1,0 +1,22 @@
+---
+bases:
+  - "../../bases/helmDefaults.yaml"
+  - "../../bases/environments.yaml"
+
+---
+repositories:
+  - name: nfs-subdir-external-provisioner
+    url: https://kubernetes-sigs.github.io/nfs-subdir-external-provisioner
+
+releases:
+  - name: nfs-provisioner
+    chart: nfs-subdir-external-provisioner/nfs-subdir-external-provisioner
+    version: {{ .Values | get "nfs-provisioner.chart_version" nil }}
+    installed: {{ .Values | get "nfs-provisioner.installed" false }}
+    namespace: nfs
+    createNamespace: true
+    labels:
+      tier: ops
+    values:
+      - values/default.yaml
+      - values/{{ .Environment.Name }}.yaml.gotmpl

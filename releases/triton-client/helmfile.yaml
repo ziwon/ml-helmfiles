@@ -1,0 +1,16 @@
+---
+bases:
+  - ../../bases/helmDefaults.yaml
+  - ../../bases/environments.yaml
+
+---
+releases:
+  - name: triton-client
+    chart: ../../charts/raw
+    installed: {{ .Values | getOrNil "triton-client.installed" | default false }}
+    namespace: seldon-system
+    createNamespace: true
+    labels:
+      tier: client
+    values:
+      - values.yaml.gotmpl

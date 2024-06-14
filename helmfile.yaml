@@ -1,0 +1,14 @@
+bases:
+  - bases/helmDefaults.yaml
+  - bases/environments.yaml
+
+helmfiles:
+  - releases/10-storage-class/helmfile.yaml
+  - releases/20-priority-class/helmfile.yaml
+  - releases/ingress-nginx/helmfile.yaml
+  - releases/nfs-subdir-external-provisioner/helmfile.yaml
+  - releases/seldon-core-operator/helmfile.yaml
+  - releases/training-job/helmfile.yaml
+  - releases/triton-client/helmfile.yaml
+
+missingFileHandler: Error

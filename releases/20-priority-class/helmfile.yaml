@@ -1,0 +1,15 @@
+---
+bases:
+  - ../../bases/helmDefaults.yaml
+  - ../../bases/environments.yaml
+
+---
+releases:
+  - name: priority-class
+    chart: ../../charts/raw
+    installed: {{ .Values | getOrNil "priority_class.installed" | default false }}
+    labels:
+      bootstrap: true
+      tier: common
+    values:
+      - values.yaml
