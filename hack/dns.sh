@@ -27,15 +27,13 @@ minikube ssh "grep -qxF '$DNS_MINIKUBE' $MINIKUBE_HOSTS_FILE || echo '$DNS_MINIK
 
 echo "Updating CoreDNS..."
 CURRENT_COREFILE=$(kubectl get configmap coredns -n kube-system -o jsonpath='{.data.Corefile}')
-PATCHED_COREFILE=$(echo "$CURRENT_COREFILE" | sed "/host\s*{/,/}/s/}/    $DNS_HOST\n    $DNS_MINIKUBE\n    fallthrough\n}/")
+INDENT="        " # 칼맞춤용 인덴트
+PATCHED_COREFILE=$(echo "$CURRENT_COREFILE" | sed "/hosts {/,/fallthrough/ s/fallthrough/${DNS_HOST} \n${INDENT}${DNS_MINIKUBE}\n${INDENT}fallthrough/")
 
 echo "Patched Corefile:"
 echo "$PATCHED_COREFILE"
 
 PATCHED_COREFILE_ESCAPED=$(echo "$PATCHED_COREFILE" | jq -sRr @json)
-
-echo "Escaped Corefile:"
-echo "$PATCHED_COREFILE_ESCAPED"
 
 kubectl patch configmap coredns -n kube-system --type merge --patch "$(cat <<EOF
 {
