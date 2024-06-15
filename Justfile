@@ -1,31 +1,27 @@
 set dotenv-load
 
-OS := "xUbuntu_22.04"
-CRIO_VERSION := "1.28"
-K8S_VERSION := "1.28"
-
 default:
   @just --list
 
 [group('prep')]
 podman:
-  echo 'deb http://download.opensuse.org/repositories/home:/alvistack/{{OS}}/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
-  curl -fsSL https://download.opensuse.org/repositories/home:alvistack/{{OS}}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
+  echo 'deb http://download.opensuse.org/repositories/home:/alvistack/${OS}/ /' | sudo tee /etc/apt/sources.list.d/home:alvistack.list
+  curl -fsSL https://download.opensuse.org/repositories/home:alvistack/${OS}/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/home_alvistack.gpg > /dev/null
   sudo apt update
   sudo apt install -y podman
 
   sudo cp /etc/sudoers /etc/sudoers.$(date +"%Y%m%d-%H%M%S").bak
-  echo "%sudo   ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
+  echo "%sudo ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee -a /etc/sudoers
   sudo -k -n podman version
 
 [group('prep')]
 crio:
-  echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{OS}}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-  echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{CRIO_VERSION}}/{{OS}}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:{{CRIO_VERSION}}.list
+  echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${OS}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+  echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/${CRIO_VERSION}/${OS}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:{CRIO_VERSION}.list
 
   sudo mkdir -p /usr/share/keyrings
-  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{OS}}/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
-  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{CRIO_VERSION}}/{{OS}}/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-crio-archive-keyring.gpg
+  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS$/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
+  curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/${CRIO_VERSION}/${OS}/Release.key | sudo gpg --dearmor -o /usr/share/keyrings/libcontainers-crio-archive-keyring.gpg
 
   sudo apt update -qq
   sudo apt install -y fuse-overlayfs containernetworking-plugins
@@ -55,7 +51,7 @@ registry-ok:
 
 [group('k8s')]
 k8s-up:
-  @minikube start --v=6 --driver=podman --container-runtime=cri-o --memory 8192 --cpus 8 --disk-size 80g --network-plugin=cni --kubernetes-version=v{{K8S_VERSION}}
+  @minikube start --v=6 --driver=podman --container-runtime=cri-o --memory 8192 --cpus 8 --disk-size 80g --network-plugin=cni --kubernetes-version=v${K8S_VERSION}
 
 [group('k8s')]
 k8s-down:
@@ -65,19 +61,20 @@ k8s-down:
   podman system reset
 
 [group('docker')]
-docker-build APP="resnet18-training":
-  @work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
+docker-build APP="${DOCKER_TRAIN_IMAGE}":
+  @echo "Building {{APP}}..."; \
+  work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
   cd $work_dir; \
   tag=$(cat $work_dir/VERSION); \
   sudo podman build -t "$REGISTRY_URL/{{APP}}:$tag" . ;\
   cd -
 
 [group('docker')]
-docker-run APP="resnet18-training":
-  @work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
+docker-run APP="${DOCKER_TRAIN_IMAGE}":
+  @echo "Running {{APP}}..."; \
+  work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
   cd $work_dir; \
   tag=$(cat $work_dir/VERSION); \
-  mkdir -p $NFS_PATH/data $NFS_PATH/models $NFS_PATH/logs; \
   sudo podman run \
     --name {{APP}} \
     --shm-size=2g \
@@ -86,11 +83,13 @@ docker-run APP="resnet18-training":
     -v $NFS_PATH/data:/app/data \
     -v $NFS_PATH/models:/app/models \
     -v $NFS_PATH/logs:/app/logs \
-    $REGISTRY_URL/{{APP}}:$tag
+    $REGISTRY_URL/{{APP}}:$tag; \
+  cd -
 
 [group('docker')]
-docker-push APP="resnet18-training":
-  @work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
+docker-push APP="${DOCKER_TRAIN_IMAGE}":
+  @echo "Pushing {{APP}}..."; \
+  work_dir={{invocation_directory()}}/charts/{{APP}}/src; \
   cd $work_dir; \
   tag=$(cat $work_dir/VERSION); \
   sudo podman push "$REGISTRY_URL/{{APP}}:$tag" ;\

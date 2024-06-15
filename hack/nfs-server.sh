@@ -5,7 +5,10 @@
 sudo apt update
 sudo apt install -y nfs-kernel-server
 
+# Prepare a share directories in NFS Server
 sudo mkdir -p ${NFS_PATH}
+sudo mkdir -p ${NFS_PATH}/data ${NFS_PATH}/models ${NFS_PATH}/logs
+
 sudo chown nobody:nogroup ${NFS_PATH}
 sudo chmod g+rwxs ${NFS_PATH}
 

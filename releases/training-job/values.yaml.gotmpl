@@ -93,7 +93,7 @@ resources:
         restartPolicy: OnFailure
         containers:
         - name: resnet18-trainer
-          image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_TRAIN_TAG" }}:{{ .Values | get "training-job.app_version" "0.1.0" }}
+          image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_TRAIN_IMAGE" }}:{{ .Values | get "training-job.app_version" "0.1.0" }}
           resources:
             limits:
               cpu: 4

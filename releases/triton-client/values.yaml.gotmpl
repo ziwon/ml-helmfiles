@@ -6,7 +6,7 @@ resources:
   spec:
     containers:
     - name: triton-client
-      image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_CLIENT_TAG" }}:{{ .Values | get "triton-client.app_version" "0.1.0" }}
+      image: {{ requiredEnv "REGISTRY_URL" }}/{{ requiredEnv "DOCKER_CLIENT_IMAGE" }}:{{ .Values | get "triton-client.app_version" "0.1.0" }}
       env:
       - name: TRITON_SERVER_URL
         value: "triton-server-default:5001"
