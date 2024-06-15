@@ -19,4 +19,4 @@ training-job:
 
 triton-client:
   installed: true
-  app_version: 0.0.2
+  app_version: 0.0.4

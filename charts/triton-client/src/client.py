@@ -1,11 +1,14 @@
 import os
+import time
 import numpy as np
 import tensorflow as tf
+
 from datasets import load_dataset
 from PIL import Image
+
 import tritonclient.grpc as grpcclient
 from tritonclient.grpc import InferInput, InferRequestedOutput
-import time
+
 
 def preprocess(image):
     img = image.convert('L')
@@ -29,6 +32,7 @@ def main():
 
     # Preprocess the images
     input_data = [preprocess(sample["image"]) for sample in samples]
+    labels = [sample["label"] for sample in samples]
 
     # Stack the input data to form a batch and add batch dimension
     input_data = np.stack(input_data)
@@ -61,6 +65,9 @@ def main():
     # Convert logits to predicted class
     predicted_classes = np.argmax(output_data, axis=1)
     print("Predicted classes:", predicted_classes)
+
+    # Print grouped truth label
+    print("Ground truth labels:", labels)
 
 if __name__ == "__main__":
     main()
